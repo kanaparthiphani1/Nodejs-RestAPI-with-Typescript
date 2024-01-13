@@ -6,6 +6,8 @@ import router from "./routes";
 const { appConfigs, dbConfigs } = configs;
 const app = express();
 
+app.use(express.json());
+
 app.use(router);
 
 app.listen(appConfigs.port, async () => {

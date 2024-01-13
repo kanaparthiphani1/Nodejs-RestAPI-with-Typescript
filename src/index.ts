@@ -11,6 +11,6 @@ app.use(express.json());
 app.use(router);
 
 app.listen(appConfigs.port, async () => {
-  logger.info("Server Started Successfully");
+  logger.info(`Server Started`);
   dbConfigs.connect();
 });

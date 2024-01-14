@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
 import { signJwt } from "../utils/jwt";
-import { createSessionService } from "../services/session.service";
+import {
+  createSessionService,
+  findSessions,
+} from "../services/session.service";
 import configs from "../configs";
 import log from "../utils/logger";
 import { CreateSessionInput } from "../schemas/session.schema";
+import { validatePassword } from "../services/user.service";
 
 export async function createSession(
   req: Request<{}, {}, CreateSessionInput["body"]>,
@@ -12,26 +16,22 @@ export async function createSession(
 ) {
   try {
     //check if the password is valid
-    const { email, password } = req.body;
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      return res.status(401).json({
-        message: "User not registered",
-      });
-    }
+    const user = await validatePassword(req.body);
 
-    // if not return 400
-    const result = await user.comparePassword(password);
-    if (!result) {
-      return res.status(401).json({
-        message: "Invalid password",
-      });
+    if (!user) {
+      return res.status(401).send("Invalid email or password");
     }
     // if valid create a session, access token and refresh token and send them
     const session = await createSessionService(
       user._id,
       req.get("user-agent") || ""
     );
+
+    console.log(
+      "Token Objecvt : ",
+      JSON.stringify({ ...user, session: session._id })
+    );
+
     const accessToken = signJwt(
       { ...user, session: session._id },
       { expiresIn: configs.appConfigs.accessTokenTtl }
@@ -46,5 +46,15 @@ export async function createSession(
   } catch (e: any) {
     log.error(e.message);
     return res.json({ message: e.message });
+  }
+}
+
+export async function getAllSessions(req: Request, res: Response) {
+  try {
+    const userId = res.locals.user._id;
+    const sessions = await findSessions({ user: userId, valid: true });
+    return res.json(sessions);
+  } catch (e: any) {
+    return res.json({ error: e.message });
   }
 }

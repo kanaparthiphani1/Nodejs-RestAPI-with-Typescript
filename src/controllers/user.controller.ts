@@ -15,3 +15,7 @@ export async function createUser(
     res.status(409).json({ message: e.message });
   }
 }
+
+export async function getCurrentUser(req: Request, res: Response) {
+  return res.send(res.locals.user);
+}

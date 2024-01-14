@@ -49,7 +49,7 @@ export async function reIssueAccessToken({
   return accessToken;
 }
 
-export async function deleteSession(
+export async function updateSession(
   query: FilterQuery<sessionDocument>,
   updateQuery: FilterQuery<sessionDocument>
 ) {

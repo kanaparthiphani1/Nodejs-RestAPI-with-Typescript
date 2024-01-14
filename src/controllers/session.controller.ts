@@ -4,6 +4,7 @@ import { signJwt } from "../utils/jwt";
 import {
   createSessionService,
   findSessions,
+  updateSession,
 } from "../services/session.service";
 import configs from "../configs";
 import log from "../utils/logger";
@@ -57,4 +58,15 @@ export async function getAllSessions(req: Request, res: Response) {
   } catch (e: any) {
     return res.json({ error: e.message });
   }
+}
+
+export async function deleteSession(req: Request, res: Response) {
+  const sessionId = req.params.id;
+
+  await updateSession({ _id: sessionId }, { valid: false });
+
+  return res.send({
+    accessToken: null,
+    refreshToken: null,
+  });
 }
